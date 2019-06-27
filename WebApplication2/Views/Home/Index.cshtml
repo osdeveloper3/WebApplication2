@@ -1,7 +1,141 @@
-﻿
+﻿@model IEnumerable<WebApplication2.Models.user_table>
+
 @{
     ViewBag.Title = "Index";
 }
 
 <h2>Index</h2>
 
+<p>
+    <button id="addUser" class="btn btn-primary">Add User</button>
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.user_name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.password)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.user_name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.password)
+        </td>
+        <td>
+            <button id="editUser" value="@item.user_id" class="btn btn-primary">Edit</button> |
+            <button id="viewUser" value="@item.user_id" class="btn btn-info">Details</button> |
+            <button id="deleteUser" value="@item.user_id" class="btn btn-danger">Delete</button>
+        </td>
+    </tr>
+}
+
+</table>
+
+@section Scripts {
+    <script>
+
+        $(document).ready(function () {
+
+            $("#addUser").click(function () {
+
+                $.ajax({
+                    url: "/Home/Popup",
+                    success: function (result) {
+                        $("#box").html(result);
+                        $("#myModal").modal();
+                    },
+                    error: function () {
+                        alert("Server Not Found");
+                    }
+                });
+
+            });
+
+
+            $("table tr td").delegate("#editUser", "click", function () {
+
+                $.ajax({
+                    url: "/Home/Edit",
+                    type: "POST",
+                    data: { id: $(this).val() },
+                    success: function (result) {
+                        $("#box").html(result);
+                        $("#myModal").modal();
+                    },
+                    error: function () {
+                        alert("Server Not Found");
+                    }
+                });
+
+            });
+
+
+            $("table tr td").delegate("#viewUser", "click", function () {
+
+                $.ajax({
+                    url: "/Home/Details",
+                    type: "POST",
+                    data: { id: $(this).val() },
+                    success: function (result) {
+                        $("#box").html(result);
+                        $("#myModal").modal();
+                    },
+                    error: function () {
+                        alert("Server Not Found");
+                    }
+                });
+
+            });
+
+
+            $("table tr td").delegate("#deleteUser", "click", function () {
+
+                var del = confirm("Are you sure want to delete this");
+
+                if (del == true) {
+                    $.ajax({
+                        url: "/Home/Delete",
+                        type: "POST",
+                        data: { id: $(this).val() },
+                        success: function (result) {
+                            alert("Data Successfully Deleted");
+                            window.location.reload();
+                        },
+                        error: function () {
+                            alert("Server Not Found");
+                        }
+                    });
+                }
+
+            });
+
+
+
+        });
+
+
+        function OnSuccess(response) {
+            console.log(response);
+            if (response == 1) {
+                alert("Saved Sucessfullly");
+                window.location.reload();
+            } else if (response != 0) {
+                alert("This user name '"+response+"' is Already Taken");
+            } else {
+                alert("Server Error! / Invaild Data");
+            }
+        }
+
+    </script>   
+}
+
+
+<div id="box"></div>
